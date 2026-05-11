@@ -18,6 +18,9 @@ def izveidot_db():
 
 izveidot_db()
 
+@app.route("/")
+def home():
+    return render_template("home.html")
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -51,13 +54,24 @@ def login():
         conn.close()
 
         if user:
-            return "Tu esi pieslēdzies!"
+            return redirect("dashboard")
         else:
             return "Nepareizs lietotājvārds vai parole!"
 
     return render_template("login.html")
 
+@app.route("/dashboard", methods=["GET", "POST"])
+def dashboard():
+    if request.method == "POST":
+        tips = request.form["veids"]
+        daudzums = request.form["daudzums"]
 
+        conn = sqlite3.connect("users.db")
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO medus (amount, type) VALUES (?, ?)", (daudzums, tips))
+        conn.commit()
+        conn.close()
+    return render_template("dashboard.html")
 
 if __name__ == "__main__":
     app.run(debug=True)
