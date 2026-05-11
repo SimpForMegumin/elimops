@@ -17,3 +17,47 @@ def izveidot_db():
     conn.close()
 
 izveidot_db()
+
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+
+        conn = sqlite3.connect("users.db")
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+        conn.commit()
+        conn.close()
+
+        return redirect("/login")
+
+    return render_template("register.html")
+
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+
+        conn = sqlite3.connect("users.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
+        user = cursor.fetchone()
+        conn.close()
+
+        if user:
+            return "Tu esi pieslēdzies!"
+        else:
+            return "Nepareizs lietotājvārds vai parole!"
+
+    return render_template("login.html")
+
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
